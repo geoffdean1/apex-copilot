@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apex Copilot - Adventure Creator Engine v2.5</title>
+  <title>Apex Copilot</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -19,7 +19,7 @@
   </script>
   <script>
     (function guardAccess() {
-      const SECRET_PIN = "9812"; // Choose a shared password for you and your partner
+      const SECRET_PIN = "9812"; 
       let authenticated = sessionStorage.getItem("apex_auth");
 
       while (authenticated !== SECRET_PIN) {
@@ -39,28 +39,33 @@
 <body class="bg-neutral-950 text-neutral-100 min-h-screen font-sans flex flex-col">
 
   <!-- Header -->
-  <header class="border-b border-neutral-800 bg-neutral-900/50 backdrop-blur px-6 py-4 flex justify-between items-center sticky top-0 z-40">
-    <div class="flex items-center gap-3">
-      <div class="bg-brand-500 text-neutral-950 p-2 rounded-lg font-bold text-xl">🧭</div>
-      <div>
-        <h1 class="font-bold text-lg leading-tight">Apex Copilot <span class="text-xs bg-brand-500/20 text-brand-500 px-2 py-0.5 rounded ml-2 border border-brand-500/30">v2.5 Workflow Edition</span></h1>
-        <p class="text-xs text-neutral-400">Algorithmic Instagram Growth for Adventure, Moto & Exploration Creators</p>
-      </div>
+  <header class="border-b border-neutral-800 bg-neutral-900/80 backdrop-blur px-4 sm:px-6 py-3 flex justify-between items-center sticky top-0 z-40">
+    <div class="flex items-center gap-2.5">
+      <div class="bg-brand-500 text-neutral-950 p-1.5 rounded-lg font-bold text-lg">🧭</div>
+      <h1 class="font-bold text-base sm:text-lg leading-tight">Apex Copilot</h1>
     </div>
-    <div class="flex items-center gap-2">
-      <button onclick="toggleModal('apiKeyModal')" class="text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-3 py-1.5 rounded-md transition border border-neutral-700 flex items-center gap-1.5">
-        🔑 API Key
+
+    <!-- Mobile-Friendly Settings Dropdown & Actions -->
+    <div class="relative">
+      <button onclick="toggleMenu()" class="text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 px-3 py-1.5 rounded-lg transition border border-neutral-700 flex items-center gap-1.5 font-medium">
+        ⚙️ <span class="hidden sm:inline">Settings</span> Menu ▾
       </button>
-      <button onclick="toggleModal('analyticsModal')" class="text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-3 py-1.5 rounded-md transition border border-neutral-700 flex items-center gap-1.5">
-        📊 Performance Ledger
-      </button>
-      <button onclick="toggleModal('settingsModal')" class="text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-3 py-1.5 rounded-md transition border border-neutral-700">
-        ⚙️ System Voice
-      </button>
+
+      <div id="settingsDropdown" class="hidden absolute right-0 mt-2 w-48 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl py-1 z-50">
+        <button onclick="toggleModal('apiKeyModal'); toggleMenu();" class="w-full text-left px-4 py-2.5 text-xs text-neutral-300 hover:bg-neutral-800 flex items-center gap-2 border-b border-neutral-800/50">
+          🔑 API Key Configuration
+        </button>
+        <button onclick="toggleModal('analyticsModal'); toggleMenu();" class="w-full text-left px-4 py-2.5 text-xs text-neutral-300 hover:bg-neutral-800 flex items-center gap-2 border-b border-neutral-800/50">
+          📊 Performance Ledger
+        </button>
+        <button onclick="toggleModal('settingsModal'); toggleMenu();" class="w-full text-left px-4 py-2.5 text-xs text-neutral-300 hover:bg-neutral-800 flex items-center gap-2">
+          ⚙️ Creator Voice Rules
+        </button>
+      </div>
     </div>
   </header>
 
-  <main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
     <!-- LEFT COLUMN: Inputs (5 Cols) -->
     <section class="lg:col-span-5 space-y-5">
@@ -92,8 +97,8 @@
         <div class="border-2 border-dashed border-neutral-800 hover:border-neutral-700 rounded-lg p-5 text-center cursor-pointer relative transition" id="dropZone">
           <input type="file" id="imageInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleImageSelect(event)">
           <div id="uploadPlaceholder" class="space-y-1">
-            <p class="text-sm font-medium text-neutral-300">Drop image here, browse, or <span class="text-brand-500 font-semibold">Ctrl+V to paste</span></p>
-            <p class="text-xs text-neutral-500">Clipboard Screenshots (Win+Shift+S), JPG, PNG, WebP</p>
+            <p class="text-sm font-medium text-neutral-300">Tap to upload image or <span class="text-brand-500 font-semibold">Paste</span></p>
+            <p class="text-xs text-neutral-500">Photos, Screenshots, JPG, PNG, WebP</p>
           </div>
           <img id="imagePreview" class="hidden max-h-48 mx-auto rounded-lg object-cover">
         </div>
@@ -118,7 +123,7 @@
     </section>
 
     <!-- RIGHT COLUMN: Strategic Output & Analysis (7 Cols) -->
-    <section class="lg:col-span-7 bg-neutral-900 border border-neutral-800 rounded-xl p-6 flex flex-col justify-between space-y-6 min-h-[600px]">
+    <section class="lg:col-span-7 bg-neutral-900 border border-neutral-800 rounded-xl p-4 sm:p-6 flex flex-col justify-between space-y-6 min-h-[500px]">
       <div>
         <div class="flex justify-between items-center mb-4 pb-3 border-b border-neutral-800">
           <h2 class="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Strategic Output & Analysis</h2>
@@ -247,7 +252,7 @@
       recognition.onerror = (err) => {
         console.warn("Speech recognition notice:", err.error);
         if (err.error === 'not-allowed') {
-          alert('Microphone access blocked. Host via local server (e.g. VS Code Live Server) to allow permanent mic permissions.');
+          alert('Microphone access blocked. Ensure you are using HTTPS on your domain.');
           stopDictation();
         }
       };
@@ -271,7 +276,7 @@
         try {
           recognition.start();
           isRecording = true;
-          document.getElementById('micStatus').innerText = "Listening (Click to Stop)...";
+          document.getElementById('micStatus').innerText = "Listening...";
           document.getElementById('micBtn').classList.add('bg-red-500/20', 'text-red-400', 'animate-pulse');
         } catch(e) {
           console.error(e);
@@ -286,6 +291,10 @@
       }
       document.getElementById('micStatus').innerText = "Dictate";
       document.getElementById('micBtn').classList.remove('bg-red-500/20', 'text-red-400', 'animate-pulse');
+    }
+
+    function toggleMenu() {
+      document.getElementById('settingsDropdown').classList.toggle('hidden');
     }
 
     function toggleModal(id) {
@@ -373,28 +382,47 @@
       }, 2000);
     }
 
-    // Individual Option Copy Helper (Formatted specifically for iPhone / iCloud Notes)
+    // Copy Only On-Screen Text Hook
+    function copyHookOnly(optKey, btnElement) {
+      const data = parsedOptionsData[optKey];
+      if (!data) return alert('Option data not available.');
+
+      navigator.clipboard.writeText(data.hook);
+      showTemporaryCopyState(btnElement, "✓ Hook Copied!");
+    }
+
+    // Copy Caption + CTA + Hashtags together for Instagram Caption area
+    function copyCaptionOnly(optKey, btnElement) {
+      const data = parsedOptionsData[optKey];
+      if (!data) return alert('Option data not available.');
+
+      const captionText = `${data.caption}\n\n${data.cta}\n${data.hashtags}`;
+      navigator.clipboard.writeText(captionText);
+      showTemporaryCopyState(btnElement, "✓ Caption Copied!");
+    }
+
+    // Copy formatted option for notes
     function copyOptionFormatted(optKey, btnElement) {
       const data = parsedOptionsData[optKey];
       if (!data) return alert('Option data not available.');
 
-      const formattedText = `On-Screen Text Hook (First 3 sec): \n${data.hook}\nCaption with Call to Action and Hastags: \n${data.caption}\n\n${data.cta}\n${data.hashtags}`;
-
+      const formattedText = `On-Screen Text Hook (First 3 sec): \n${data.hook}\n\nCaption with Call to Action and Hashtags: \n${data.caption}\n\n${data.cta}\n${data.hashtags}`;
       navigator.clipboard.writeText(formattedText);
+      showTemporaryCopyState(btnElement, "✓ Both Copied!");
+    }
 
+    function showTemporaryCopyState(btnElement, text) {
       const originalText = btnElement.innerText;
-      btnElement.innerText = "✓ Copied for Notes!";
-      btnElement.classList.replace('bg-brand-500', 'bg-green-600');
-      btnElement.classList.replace('text-neutral-950', 'text-white');
+      btnElement.innerText = text;
+      btnElement.classList.add('bg-green-600', 'text-white');
 
       setTimeout(() => {
         btnElement.innerText = originalText;
-        btnElement.classList.replace('bg-green-600', 'bg-brand-500');
-        btnElement.classList.replace('text-white', 'text-neutral-950');
+        btnElement.classList.remove('bg-green-600', 'text-white');
       }, 2000);
     }
 
-    // Parse the Markdown response to extract structured hooks/captions for one-click copy
+    // Parse Markdown and inject individual copy buttons
     function parseAndRenderResponse(markdown) {
       parsedOptionsData = {};
 
@@ -416,18 +444,26 @@
         .replace(/\*\*(.*?)\*\*/g, '<strong class="text-neutral-100 font-semibold">$1</strong>')
         .replace(/\n/g, '<br>');
 
-      // Inject individual "Copy Option" buttons into Option A, Option B, Option C section headers
+      // Inject action copy bars into Option headers
       ['A', 'B', 'C'].forEach(letter => {
         if (parsedOptionsData[letter]) {
           const headerPattern = new RegExp(`<h3 class="font-bold text-brand-500 text-sm mt-6 mb-2 border-b border-neutral-800 pb-1 uppercase tracking-wider">Option ${letter} (.*?)<\/h3>`, 'g');
 
           renderedHtml = renderedHtml.replace(headerPattern, (fullMatch, p1) => {
             return `
-              <div class="flex justify-between items-center mt-6 mb-2 border-b border-neutral-800 pb-2 bg-neutral-950/60 p-3 rounded-lg border">
+              <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mt-6 mb-3 bg-neutral-950 p-3 rounded-xl border border-neutral-800">
                 <h3 class="font-bold text-brand-500 text-sm uppercase tracking-wider">Option ${letter} ${p1}</h3>
-                <button onclick="copyOptionFormatted('${letter}', this)" class="text-xs bg-brand-500 hover:bg-brand-600 text-neutral-950 font-bold px-3 py-1.5 rounded transition flex items-center gap-1 shadow">
-                  📋 Copy Option ${letter}
-                </button>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <button onclick="copyHookOnly('${letter}', this)" class="text-[11px] bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-medium px-2.5 py-1 rounded transition border border-neutral-700">
+                    🪝 Hook
+                  </button>
+                  <button onclick="copyCaptionOnly('${letter}', this)" class="text-[11px] bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-medium px-2.5 py-1 rounded transition border border-neutral-700">
+                    📝 Caption
+                  </button>
+                  <button onclick="copyOptionFormatted('${letter}', this)" class="text-[11px] bg-brand-500 hover:bg-brand-600 text-neutral-950 font-bold px-2.5 py-1 rounded transition">
+                    📋 Both
+                  </button>
+                </div>
               </div>`;
           });
         }
