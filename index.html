@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Copilot - Adventure Creator Engine v2.5</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#f97316', 600: '#ea580c' }
+          }
+        }
+      }
+    }
+  </script>
+  <script>
+    (function guardAccess() {
+      const SECRET_PIN = "9812"; // Choose a shared password for you and your partner
+      let authenticated = sessionStorage.getItem("apex_auth");
+
+      while (authenticated !== SECRET_PIN) {
+        const input = prompt("Enter access code to open Apex Copilot:");
+        if (input === SECRET_PIN) {
+          sessionStorage.setItem("apex_auth", SECRET_PIN);
+          authenticated = SECRET_PIN;
+        } else if (input === null) {
+          document.write("<div style='background:#0a0a0a;color:#fff;height:100vh;display:flex;justify-content:center;align-items:center;font-family:sans-serif;'>Access Denied. Reload page to try again.</div>");
+          window.stop();
+          break;
+        }
+      }
+    })();
+   </script>
+</head>
+<body class="bg-neutral-950 text-neutral-100 min-h-screen font-sans flex flex-col">
+
+  <!-- Header -->
+  <header class="border-b border-neutral-800 bg-neutral-900/50 backdrop-blur px-6 py-4 flex justify-between items-center sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <div class="bg-brand-500 text-neutral-950 p-2 rounded-lg font-bold text-xl">🧭</div>
+      <div>
+        <h1 class="font-bold text-lg leading-tight">Apex Copilot <span class="text-xs bg-brand-500/20 text-brand-500 px-2 py-0.5 rounded ml-2 border border-brand-500/30">v2.5 Workflow Edition</span></h1>
+        <p class="text-xs text-neutral-400">Algorithmic Instagram Growth for Adventure, Moto & Exploration Creators</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleModal('apiKeyModal')" class="text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-3 py-1.5 rounded-md transition border border-neutral-700 flex items-center gap-1.5">
+        🔑 API Key
+      </button>
+      <button onclick="toggleModal('analyticsModal')" class="text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-3 py-1.5 rounded-md transition border border-neutral-700 flex items-center gap-1.5">
+        📊 Performance Ledger
+      </button>
+      <button onclick="toggleModal('settingsModal')" class="text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-3 py-1.5 rounded-md transition border border-neutral-700">
+        ⚙️ System Voice
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT COLUMN: Inputs (5 Cols) -->
+    <section class="lg:col-span-5 space-y-5">
+
+      <!-- LEVEL 1: Content Mode Selector -->
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1">Level 1: Content Mode (Style & Format)</label>
+        <p class="text-[11px] text-neutral-500 mb-3">Select the creative style. Subject matter is detected automatically from your image.</p>
+
+        <div class="grid grid-cols-2 gap-2" id="categoryGrid">
+          <button onclick="selectCategory('cinematic')" id="cat-cinematic" class="cat-btn p-2.5 rounded-lg border border-brand-500 bg-brand-500/10 text-brand-500 text-left text-xs font-medium transition">
+            🔊 Cinematic <span class="block text-[10px] opacity-70">Atmosphere, drones, landscapes, POV, scenic rides</span>
+          </button>
+          <button onclick="selectCategory('witty')" id="cat-witty" class="cat-btn p-2.5 rounded-lg border border-neutral-800 bg-neutral-950 text-neutral-400 text-left text-xs font-medium transition hover:border-neutral-700">
+            😏 Witty & Comical <span class="block text-[10px] opacity-70">Dry humor, travel mishaps, drone fails, tech bugs</span>
+          </button>
+          <button onclick="selectCategory('interaction')" id="cat-interaction" class="cat-btn p-2.5 rounded-lg border border-neutral-800 bg-neutral-950 text-neutral-400 text-left text-xs font-medium transition hover:border-neutral-700">
+            👀 Encounters <span class="block text-[10px] opacity-70">Strangers, wildlife, travel moments, road chats</span>
+          </button>
+          <button onclick="selectCategory('garage')" id="cat-garage" class="cat-btn p-2.5 rounded-lg border border-neutral-800 bg-neutral-950 text-neutral-400 text-left text-xs font-medium transition hover:border-neutral-700">
+            🛠 Garage & Projects <span class="block text-[10px] opacity-70">Moto mods, DJI/camera setups, software, GPS</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Media Upload / Clipboard Paste / Frame Capture -->
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Visual Media (Screenshot / Photo)</label>
+        <div class="border-2 border-dashed border-neutral-800 hover:border-neutral-700 rounded-lg p-5 text-center cursor-pointer relative transition" id="dropZone">
+          <input type="file" id="imageInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleImageSelect(event)">
+          <div id="uploadPlaceholder" class="space-y-1">
+            <p class="text-sm font-medium text-neutral-300">Drop image here, browse, or <span class="text-brand-500 font-semibold">Ctrl+V to paste</span></p>
+            <p class="text-xs text-neutral-500">Clipboard Screenshots (Win+Shift+S), JPG, PNG, WebP</p>
+          </div>
+          <img id="imagePreview" class="hidden max-h-48 mx-auto rounded-lg object-cover">
+        </div>
+      </div>
+
+      <!-- Extra Context + Dictation -->
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+        <div class="flex justify-between items-center mb-2">
+          <label class="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Context & Clues</label>
+          <button type="button" onclick="toggleDictation()" id="micBtn" class="text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-2 py-1 rounded transition flex items-center gap-1">
+            🎙️ <span id="micStatus">Dictate</span>
+          </button>
+        </div>
+        <textarea id="extraContext" rows="3" placeholder="e.g., DJI Mini 2 coastline shot at sunset, testing GPS telemetry overlay, camping trip near Big Sur..."
+          class="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-3 text-sm text-neutral-200 focus:outline-none focus:border-brand-500 transition"></textarea>
+      </div>
+
+      <button onclick="generatePosts()" id="generateBtn"
+        class="w-full bg-brand-500 hover:bg-brand-600 text-neutral-950 font-bold py-3.5 rounded-xl transition flex justify-center items-center gap-2 shadow-lg shadow-brand-500/10">
+        <span>⚡ Analyze & Generate Strategic Copy</span>
+      </button>
+    </section>
+
+    <!-- RIGHT COLUMN: Strategic Output & Analysis (7 Cols) -->
+    <section class="lg:col-span-7 bg-neutral-900 border border-neutral-800 rounded-xl p-6 flex flex-col justify-between space-y-6 min-h-[600px]">
+      <div>
+        <div class="flex justify-between items-center mb-4 pb-3 border-b border-neutral-800">
+          <h2 class="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Strategic Output & Analysis</h2>
+          <button id="copyAllBtn" onclick="copyAllText()" class="hidden text-xs bg-brand-500 text-neutral-950 font-bold px-3 py-1.5 rounded-lg transition hover:bg-brand-600">
+            📋 Copy Full Report
+          </button>
+        </div>
+        <div id="outputArea" class="space-y-6 text-sm text-neutral-300">
+          <div class="h-full flex flex-col justify-center items-center text-neutral-600 text-center py-20 space-y-3">
+            <span class="text-4xl">🧭</span>
+            <p class="text-xs max-w-sm">Select a Content Mode, upload/paste a screenshot, and let Apex Copilot detect the subject and pick the optimal engagement strategy.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- API Key Modal -->
+  <div id="apiKeyModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-base flex items-center gap-2">🔑 Gemini API Key Configuration</h3>
+        <button onclick="toggleModal('apiKeyModal')" class="text-neutral-500 hover:text-neutral-300">✕</button>
+      </div>
+      <p class="text-xs text-neutral-400">Your key is saved locally in your browser and used to authenticate requests with the Gemini API.</p>
+
+      <div>
+        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">API Key</label>
+        <input type="password" id="apiKey" placeholder="Paste your Gemini API Key..."
+          class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm text-neutral-200 focus:outline-none focus:border-brand-500 transition">
+      </div>
+
+      <button onclick="saveApiKey()" class="w-full bg-brand-500 hover:bg-brand-600 text-neutral-950 font-bold py-2 rounded-lg transition text-xs">
+        Save API Key
+      </button>
+    </div>
+  </div>
+
+  <!-- Performance Ledger Modal -->
+  <div id="analyticsModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl max-w-xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-base flex items-center gap-2">📊 Performance Memory Ledger</h3>
+        <button onclick="toggleModal('analyticsModal')" class="text-neutral-500 hover:text-neutral-300">✕</button>
+      </div>
+      <p class="text-xs text-neutral-400">Log actual post metrics here. The AI will analyze top-performing posts to continuously optimize future captions.</p>
+
+      <div class="space-y-3 bg-neutral-950 p-4 rounded-lg border border-neutral-800">
+        <h4 class="text-xs font-semibold text-brand-500 uppercase">Log New Post Data</h4>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <input type="text" id="logHook" placeholder="Hook used..." class="col-span-2 bg-neutral-900 border border-neutral-800 rounded p-2 text-neutral-200">
+          <input type="number" id="logViews" placeholder="Views" class="bg-neutral-900 border border-neutral-800 rounded p-2 text-neutral-200">
+          <input type="number" id="logShares" placeholder="Shares (DMs)" class="bg-neutral-900 border border-neutral-800 rounded p-2 text-neutral-200">
+          <input type="number" id="logSaves" placeholder="Saves" class="bg-neutral-900 border border-neutral-800 rounded p-2 text-neutral-200">
+          <input type="number" id="logComments" placeholder="Comments" class="bg-neutral-900 border border-neutral-800 rounded p-2 text-neutral-200">
+        </div>
+        <button onclick="savePostMetrics()" class="w-full bg-brand-500 hover:bg-brand-600 text-neutral-950 font-bold py-1.5 rounded text-xs transition">
+          Log Performance Metrics
+        </button>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1">Performance Data History</label>
+        <textarea id="performanceLedger" rows="6" class="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-3 text-xs font-mono text-neutral-300 focus:outline-none focus:border-brand-500"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Persona Settings Modal -->
+  <div id="settingsModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+    <div class="bg-neutral-900 border border-neutral-800 rounded-xl max-w-lg w-full p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-base">Creator Persona & Voice Rules</h3>
+        <button onclick="toggleModal('settingsModal')" class="text-neutral-500 hover:text-neutral-300">✕</button>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1">System Instructions & Tone</label>
+        <textarea id="personaRules" rows="6" class="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-3 text-sm text-neutral-200 focus:outline-none focus:border-brand-500"></textarea>
+      </div>
+
+      <button onclick="saveSettings()" class="w-full bg-brand-500 hover:bg-brand-600 text-neutral-950 font-bold py-2 rounded-lg transition text-xs">
+        Save Persona Configuration
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let activeCategory = 'cinematic';
+    let imageBase64 = null;
+    let rawGeneratedText = "";
+    let parsedOptionsData = {};
+    let isRecording = false;
+    let recognition = null;
+    let baseContextValue = "";
+
+    const defaultPersona = `Authentic adventure creator persona (Motorcycles, Drones, Exploration, Travel, Tech, Overlanding).
+- Understated, dry, deadpan, self-aware wit, and authentic technical/outdoor domain knowledge.
+- NO PUNS. NO cheesy jokes.
+- NEVER use cliché terms: "living life", "adventure awaits", "blessed", "wanderlust", "two wheels", "wind in my hair", "biker family".
+- AVOID fake hype, corporate buzzwords, and overly enthusiastic influencer tone.
+- Use deadpan observations: "My setup now has better bedding than I do." / "Sometimes engineering is just arts and crafts with expensive consequences."
+- Maintain brand consistency regardless of whether the post features a motorcycle, a drone coastline shot, or software development.`;
+
+    document.getElementById('apiKey').value = localStorage.getItem('apex_api_key') || '';
+    document.getElementById('personaRules').value = localStorage.getItem('apex_persona_rules') || defaultPersona;
+    document.getElementById('performanceLedger').value = localStorage.getItem('apex_performance_ledger') || `[HISTORICAL PERFORMANCE LOG]\n- Hook: "The sound at 4,000 RPM." | Views: 45K | Shares: 1.2K | Saves: 850 (High DM Share Winner)\n- Hook: "Why do drivers do this?" | Views: 120K | Comments: 430 (High Comment Winner)`;
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          transcript += event.results[i][0].transcript;
+        }
+        const contextBox = document.getElementById('extraContext');
+        const prefix = baseContextValue ? baseContextValue + ' ' : '';
+        contextBox.value = prefix + transcript;
+      };
+
+      recognition.onerror = (err) => {
+        console.warn("Speech recognition notice:", err.error);
+        if (err.error === 'not-allowed') {
+          alert('Microphone access blocked. Host via local server (e.g. VS Code Live Server) to allow permanent mic permissions.');
+          stopDictation();
+        }
+      };
+
+      recognition.onend = () => {
+        if (isRecording) {
+          try { recognition.start(); } catch(e){}
+        }
+      };
+    }
+
+    function toggleDictation() {
+      if (!recognition) return alert('Speech recognition not supported in this browser.');
+
+      if (isRecording) {
+        stopDictation();
+      } else {
+        const contextBox = document.getElementById('extraContext');
+        baseContextValue = contextBox.value.trim();
+
+        try {
+          recognition.start();
+          isRecording = true;
+          document.getElementById('micStatus').innerText = "Listening (Click to Stop)...";
+          document.getElementById('micBtn').classList.add('bg-red-500/20', 'text-red-400', 'animate-pulse');
+        } catch(e) {
+          console.error(e);
+        }
+      }
+    }
+
+    function stopDictation() {
+      isRecording = false;
+      if (recognition) {
+        try { recognition.stop(); } catch(e){}
+      }
+      document.getElementById('micStatus').innerText = "Dictate";
+      document.getElementById('micBtn').classList.remove('bg-red-500/20', 'text-red-400', 'animate-pulse');
+    }
+
+    function toggleModal(id) {
+      document.getElementById(id).classList.toggle('hidden');
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('apiKey').value.trim();
+      localStorage.setItem('apex_api_key', key);
+      toggleModal('apiKeyModal');
+    }
+
+    function saveSettings() {
+      localStorage.setItem('apex_persona_rules', document.getElementById('personaRules').value);
+      toggleModal('settingsModal');
+    }
+
+    function savePostMetrics() {
+      const hook = document.getElementById('logHook').value.trim();
+      const views = document.getElementById('logViews').value || 0;
+      const shares = document.getElementById('logShares').value || 0;
+      const saves = document.getElementById('logSaves').value || 0;
+      const comments = document.getElementById('logComments').value || 0;
+
+      if (!hook) return alert('Enter a hook first.');
+
+      let ledger = document.getElementById('performanceLedger').value;
+      ledger += `\n- Hook: "${hook}" | Views: ${views} | Shares: ${shares} | Saves: ${saves} | Comments: ${comments}`;
+
+      document.getElementById('performanceLedger').value = ledger;
+      localStorage.setItem('apex_performance_ledger', ledger);
+
+      document.getElementById('logHook').value = '';
+      alert('Post performance logged!');
+    }
+
+    function selectCategory(cat) {
+      activeCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.remove('border-brand-500', 'bg-brand-500/10', 'text-brand-500');
+        btn.classList.add('border-neutral-800', 'bg-neutral-950', 'text-neutral-400');
+      });
+      const selected = document.getElementById(`cat-${cat}`);
+      selected.classList.remove('border-neutral-800', 'bg-neutral-950', 'text-neutral-400');
+      selected.classList.add('border-brand-500', 'bg-brand-500/10', 'text-brand-500');
+    }
+
+    function processImageFile(file) {
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imageBase64 = e.target.result.split(',')[1];
+          document.getElementById('imagePreview').src = e.target.result;
+          document.getElementById('imagePreview').classList.remove('hidden');
+          document.getElementById('uploadPlaceholder').classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function handleImageSelect(event) {
+      const file = event.target.files[0];
+      processImageFile(file);
+    }
+
+    window.addEventListener('paste', (event) => {
+      const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+      for (let item of items) {
+        if (item.type.indexOf('image') !== -1) {
+          const blob = item.getAsFile();
+          processImageFile(blob);
+          break;
+        }
+      }
+    });
+
+    function copyAllText() {
+      navigator.clipboard.writeText(rawGeneratedText);
+      const btn = document.getElementById('copyAllBtn');
+      btn.innerText = "✓ Copied!";
+      btn.classList.replace('bg-brand-500', 'bg-green-600');
+      setTimeout(() => {
+        btn.innerText = "📋 Copy Full Report";
+        btn.classList.replace('bg-green-600', 'bg-brand-500');
+      }, 2000);
+    }
+
+    // Individual Option Copy Helper (Formatted specifically for iPhone / iCloud Notes)
+    function copyOptionFormatted(optKey, btnElement) {
+      const data = parsedOptionsData[optKey];
+      if (!data) return alert('Option data not available.');
+
+      const formattedText = `On-Screen Text Hook (First 3 sec): \n${data.hook}\nCaption with Call to Action and Hastags: \n${data.caption}\n\n${data.cta}\n${data.hashtags}`;
+
+      navigator.clipboard.writeText(formattedText);
+
+      const originalText = btnElement.innerText;
+      btnElement.innerText = "✓ Copied for Notes!";
+      btnElement.classList.replace('bg-brand-500', 'bg-green-600');
+      btnElement.classList.replace('text-neutral-950', 'text-white');
+
+      setTimeout(() => {
+        btnElement.innerText = originalText;
+        btnElement.classList.replace('bg-green-600', 'bg-brand-500');
+        btnElement.classList.replace('text-white', 'text-neutral-950');
+      }, 2000);
+    }
+
+    // Parse the Markdown response to extract structured hooks/captions for one-click copy
+    function parseAndRenderResponse(markdown) {
+      parsedOptionsData = {};
+
+      const optionRegex = /### Option ([A-C])[\s\S]*?- \*\*On-Screen Text Hook \(First 3 sec\):\*\* ([\s\S]*?)\n- \*\*Caption:\*\* ([\s\S]*?)\n- \*\*Call to Action:\*\* ([\s\S]*?)\n- \*\*Hashtags:\*\* ([\s\S]*?)\n- \*\*Predicted Engagement Score:\*\*/g;
+
+      let match;
+      while ((match = optionRegex.exec(markdown)) !== null) {
+        const letter = match[1];
+        parsedOptionsData[letter] = {
+          hook: match[2].trim(),
+          caption: match[3].trim(),
+          cta: match[4].trim(),
+          hashtags: match[5].trim()
+        };
+      }
+
+      let renderedHtml = markdown
+        .replace(/### (.*)/g, '<h3 class="font-bold text-brand-500 text-sm mt-6 mb-2 border-b border-neutral-800 pb-1 uppercase tracking-wider">$1</h3>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-neutral-100 font-semibold">$1</strong>')
+        .replace(/\n/g, '<br>');
+
+      // Inject individual "Copy Option" buttons into Option A, Option B, Option C section headers
+      ['A', 'B', 'C'].forEach(letter => {
+        if (parsedOptionsData[letter]) {
+          const headerPattern = new RegExp(`<h3 class="font-bold text-brand-500 text-sm mt-6 mb-2 border-b border-neutral-800 pb-1 uppercase tracking-wider">Option ${letter} (.*?)<\/h3>`, 'g');
+
+          renderedHtml = renderedHtml.replace(headerPattern, (fullMatch, p1) => {
+            return `
+              <div class="flex justify-between items-center mt-6 mb-2 border-b border-neutral-800 pb-2 bg-neutral-950/60 p-3 rounded-lg border">
+                <h3 class="font-bold text-brand-500 text-sm uppercase tracking-wider">Option ${letter} ${p1}</h3>
+                <button onclick="copyOptionFormatted('${letter}', this)" class="text-xs bg-brand-500 hover:bg-brand-600 text-neutral-950 font-bold px-3 py-1.5 rounded transition flex items-center gap-1 shadow">
+                  📋 Copy Option ${letter}
+                </button>
+              </div>`;
+          });
+        }
+      });
+
+      return renderedHtml;
+    }
+
+    async function generatePosts() {
+      const apiKey = document.getElementById('apiKey').value || localStorage.getItem('apex_api_key');
+      if (!apiKey) {
+        toggleModal('apiKeyModal');
+        return alert('Please configure your Gemini API Key first.');
+      }
+
+      localStorage.setItem('apex_api_key', apiKey);
+      const btn = document.getElementById('generateBtn');
+      const output = document.getElementById('outputArea');
+
+      btn.disabled = true;
+      btn.innerHTML = `<span>⏳ Auditing Visuals & Determining Strategy...</span>`;
+      output.innerHTML = `<div class="text-center py-20 space-y-3">
+        <div class="inline-block animate-spin text-2xl">⚙️</div>
+        <p class="text-xs text-neutral-400 animate-pulse">Running three-layer decision engine: Detecting subject, selecting engagement strategy, scoring scroll risk...</p>
+      </div>`;
+
+      const persona = document.getElementById('personaRules').value;
+      const ledger = document.getElementById('performanceLedger').value;
+      const extraContext = document.getElementById('extraContext').value;
+
+      const categoryDescriptions = {
+        cinematic: "🔊 Cinematic (Scenic rides, drone footage, ocean/mountains, sunsets, forests, POV riding, visual atmosphere, travel moments)",
+        witty: "😏 Witty & Comical (Dry humor, travel mishaps, drone fails, gear problems, software bugs, garage humor, relatable creator observations)",
+        interaction: "👀 Encounters (Meeting riders, interesting strangers, wildlife, road encounters, public chats, travel conversations)",
+        garage: "🛠 Garage & Projects (Motorcycle modifications, DJI/camera rigs, microphone testing, software/RouteRebel development, GPS navigation, DIY fabrication, tech gear)"
+      };
+
+      const systemPrompt = `
+You are an Instagram growth strategist for an adventure creator whose content centers around motorcycles, exploration, technology, travel, storytelling, and authentic outdoor experiences. Motorcycles are your primary anchor, but not your only theme.
+
+THREE-LAYER DECISION PROCESS:
+
+LAYER 1 — SUBJECT DETECTION (AI Determines Automatically):
+Analyze the visual and context to determine the primary subject. Options include:
+[Motorcycle | Scenic Ride | Drone | Landscape | Ocean | Mountains | Forest | Camping | Travel | Coffee Shop | Technology | DIY Project | Garage | Photography | Videography | GPS / Navigation | Route Planning | Software | Adventure | People | Wildlife | Architecture | Urban Exploration | Weather | Sunset | Other]
+
+IMPORTANT RULE — NO FORCED MOTORCYCLES:
+- If the image is a drone coastline shot, DO NOT force motorcycle references.
+- If the image is a waterfall, camp setup, coffee shop, or software session, DO NOT mention motorcycles unless explicitly present in the context.
+- Write naturally about the true subject while maintaining the creator's adventurous tone and deadpan wit.
+
+LAYER 2 — CONTENT MODE (User Selected):
+Current Active Mode: ${categoryDescriptions[activeCategory]}
+This determines the STYLE and FORMAT of the post.
+
+LAYER 3 — ENGAGEMENT STRATEGY (AI Auto-Selected):
+Silently analyze image and context to pick the optimal driver:
+[Curiosity | Storytelling | Humor | Technical | Educational | Behind the scenes | Experiment | Debate | Unexpected | Relatable | Community | Challenge | Nostalgia | Confession | Satisfaction | Problem/Solution]
+
+Select whichever strategy will maximize Watch Time, DM Shares, Saves, Comments, and Follows.
+
+IMAGE ANALYSIS QUESTIONS (Answer silently before writing):
+- What immediately catches attention?
+- What would domain experts notice?
+- What would casual viewers misunderstand?
+- What question does this naturally create?
+- Is there a hidden story or technical detail?
+- What conversation could this start?
+- What emotion does this create?
+- What would make someone stop scrolling?
+
+HUMOR GUIDELINES:
+- NO PUNS. NO cheesy puns.
+- Use deadpan humor, self-aware humor, understatement, relatable observations, unexpected comparisons.
+
+CREATOR PERSONA & anti-RULES:
+${persona}
+
+HISTORICAL PERFORMANCE MEMORY:
+${ledger}
+
+ADDITIONAL CREATOR CONTEXT:
+${extraContext}
+
+OUTPUT FORMAT (Strict Markdown - Maintain field labels exactly):
+
+### Subject Detected
+[Primary Subject Name with Emoji]
+
+### Content Mode
+[Insert active level 1 content mode with icon]
+
+### Engagement Strategy
+**Strategy:** [Chosen Strategy Name]
+**Reason:** [2-3 sentences explaining why this strategy maximizes algorithmic metrics for this specific image/context]
+
+### Image Analysis
+- **Visuals:** [Description of key details, landscape, tech, mechanicals, environment]
+- **Rider / Outdoor Perspective:** [What experienced adventurers or domain experts notice]
+- **Casual Viewer Perspective:** [What non-experts misinterpret]
+- **Story Opportunity:** [Hidden tension, technical challenge, or narrative hook]
+
+### Option A (Highest Predicted Engagement)
+- **On-Screen Text Hook (First 3 sec):** [Hook text]
+- **Caption:** [Caption text]
+- **Call to Action:** [CTA text]
+- **Hashtags:** [8-12 targeted, non-spammy hashtags]
+- **Predicted Engagement Score:** [1-10]
+- **Comment Potential:** [High/Med/Low + Why]
+- **Share Potential:** [High/Med/Low + Why]
+- **Save Potential:** [High/Med/Low + Why]
+- **Follower Conversion Potential:** [High/Med/Low + Why]
+
+### Option B (Story-Driven Version)
+- **On-Screen Text Hook (First 3 sec):** [Hook text]
+- **Caption:** [Caption text]
+- **Call to Action:** [CTA text]
+- **Hashtags:** [8-12 targeted, non-spammy hashtags]
+- **Predicted Engagement Score:** [1-10]
+- **Comment Potential:** [High/Med/Low + Why]
+- **Share Potential:** [High/Med/Low + Why]
+- **Save Potential:** [High/Med/Low + Why]
+- **Follower Conversion Potential:** [High/Med/Low + Why]
+
+### Option C (Humor-First Version)
+- **On-Screen Text Hook (First 3 sec):** [Hook text]
+- **Caption:** [Caption text]
+- **Call to Action:** [CTA text]
+- **Hashtags:** [8-12 targeted, non-spammy hashtags]
+- **Predicted Engagement Score:** [1-10]
+- **Comment Potential:** [High/Med/Low + Why]
+- **Share Potential:** [High/Med/Low + Why]
+- **Save Potential:** [High/Med/Low + Why]
+- **Follower Conversion Potential:** [High/Med/Low + Why]
+
+### Hook Rankings
+- **Rankings:** [1, 2, 3 ranked]
+- **Analysis:** [Why Option X hook is the strongest scroll-stopper]
+
+### Caption Critique
+- **Clichés Identified:** [List clichés or weak phrasing]
+- **Rewrites:** [Stronger replacements]
+- **Why It's Stronger:** [Explanation]
+
+### Predicted Audience Comments
+1. [Comment 1]
+2. [Comment 2]
+3. [Comment 3]
+4. [Comment 4]
+5. [Comment 5]
+6. [Comment 6]
+7. [Comment 7]
+8. [Comment 8]
+9. [Comment 9]
+10. [Comment 10]
+- **Viability Assessment:** [If predicted comments are generic, explain how to fix the hook]
+
+### Better Angle
+- **Alternative Angle:** [Suggest a creative pivot that could outperform all three options above]
+
+### Audio Recommendation
+- **Recommendation:** [Ambient sound / Engine audio / Voice-over / Trending audio / Quiet audio]
+- **Rationale:** [Why this audio fits best]
+
+### Hashtag Analysis
+- **Selection Rationale:** [Why these specific tags were chosen]
+
+### Viral Risk Analysis
+- **Failure Risks:** [What could make this post flop]
+- **Success Factors:** [What could make it go viral]
+`;
+
+      try {
+        let parts = [{ text: systemPrompt }];
+        if (imageBase64) {
+          parts.push({ inline_data: { mime_type: "image/jpeg", data: imageBase64 } });
+        }
+
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+
+        let response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts }] })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.error?.message || `HTTP error ${response.status}`);
+        }
+
+        const data = await response.json();
+        rawGeneratedText = data.candidates[0].content.parts[0].text;
+
+        output.innerHTML = parseAndRenderResponse(rawGeneratedText);
+        document.getElementById('copyAllBtn').classList.remove('hidden');
+
+      } catch (err) {
+        console.error("API Call Error:", err);
+        output.innerHTML = `<div class="p-4 border border-red-500/30 bg-red-500/10 rounded-lg text-red-400 space-y-1">
+          <p class="font-bold text-sm">Generation Error:</p>
+          <p class="text-xs font-mono">${err.message}</p>
+        </div>`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>⚡ Analyze & Generate Strategic Copy</span>`;
+      }
+    }
+  </script>
+</body>
+</html>
